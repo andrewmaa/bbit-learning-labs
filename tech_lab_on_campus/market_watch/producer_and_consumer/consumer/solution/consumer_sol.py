@@ -1,8 +1,6 @@
-from multiprocessing.dummy import connection
-
 import pika
 import os
-from tech_lab_on_campus.market_watch.producer_and_consumer.consumer.consumer_interface import mqConsumerInterface
+from consumer_interface import mqConsumerInterface
 
 
 class mqConsumer(mqConsumerInterface):
@@ -33,20 +31,28 @@ class mqConsumer(mqConsumerInterface):
         )
 
 
-def on_message_callback(self, channel, method_frame, body):
-        channel.basic_ack(method_frame.delivery_tag, False)
-        print(body.decode('utf-8'))
+    def on_message_callback(self, channel, method_frame, header_frame, body):
+            channel.basic_ack(method_frame.delivery_tag, False)
+            print(body.decode('utf-8'))
 
 
-        channel.close()
-        self.connection.close()
+            channel.close()
+            self.connection.close()
 
-def startConsuming(self):
-    print(" [*] Waiting for messages. To exit press CTRL+C")
-    self.channel.start_consuming()
+    def startConsuming(self):
+        print(" [*] Waiting for messages. To exit press CTRL+C")
+        self.channel.start_consuming()
 
-def __del__(self):
-     print("Closing RMQ connection on destruction")
-     self.channel.close()
-
-     self.connection.close()
+    def __del__(self):
+        print("Closing RMQ connection on destruction")
+        try:
+            if self.channel and self.channel.is_open:
+                self.channel.close()
+        except Exception:
+             pass
+        
+        try:
+             if self.connection and self.connection.is_open:
+                self.connection.close()
+        except Exception:
+            pass
